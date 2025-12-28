@@ -31,32 +31,45 @@
             --border: rgba(0, 0, 0, 0.08);
         }
 
-        html, body { overflow-x: hidden; width: 100%; position: relative; }
-        * { margin: 0; padding: 0; box-sizing: border-box; transition: background 0.4s, color 0.4s; }
+        /* Sayfa Başlangıçta Kaymaz */
+        html, body { 
+            overflow-x: hidden; 
+            width: 100%; 
+            height: 100%;
+            margin: 0; padding: 0;
+        }
         
         body {
             background: var(--bg);
             color: var(--text);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
-            display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: flex-start;
+            padding: 40px 20px;
         }
 
-        /* --- ÜST AYDINLATMA --- */
-        .cosmic-glow {
+        /* Üst Aydınlatma */
+        .cosmic-glow-top {
             position: fixed; top: -15%; left: 50%; transform: translateX(-50%);
-            width: 140%; height: 70%;
+            width: 140%; height: 60%;
             background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%);
             z-index: -2; pointer-events: none;
-            animation: breathe-glow 6s ease-in-out infinite alternate;
+            transition: opacity 1s ease;
         }
 
-        @keyframes breathe-glow {
-            0% { opacity: 0.4; transform: translateX(-50%) scale(1); filter: blur(40px); }
-            100% { opacity: 1; transform: translateX(-50%) scale(1.15); filter: blur(60px); }
+        /* Alt Aydınlatma (Sadece Çalışırken) */
+        .cosmic-glow-bottom {
+            position: fixed; bottom: -15%; left: 50%; transform: translateX(-50%);
+            width: 140%; height: 60%;
+            background: radial-gradient(circle at 50% 100%, var(--accent-glow) 0%, transparent 60%);
+            z-index: -2; pointer-events: none;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
 
-        /* --- PARÇACIKLAR --- */
+        body.running-timer .cosmic-glow-bottom { opacity: 1; }
+        body.running-timer .data-explorer, body.running-timer .signature { opacity: 0; pointer-events: none; }
+
         .particles-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1; pointer-events: none;
@@ -75,7 +88,7 @@
             100% { transform: translate(-20px, -100vh) scale(1); }
         }
 
-        /* --- ANA KONTEYNER VE KRONOMETRE --- */
+        /* Orijinal Geniş Konteyner */
         .glass-container {
             background: var(--card);
             backdrop-filter: var(--glass);
@@ -85,13 +98,23 @@
             width: 100%; max-width: 850px;
             text-align: center;
             box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-            margin-bottom: 30px;
+            margin-bottom: 50px;
+            margin-top: 5vh;
             position: relative;
+            z-index: 10;
         }
 
         .timer-box {
             position: relative; display: inline-block; padding: 10px 40px;
             border-radius: 30px; transition: 0.5s;
+        }
+
+        /* Orijinal Büyük Font */
+        .timer-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(3.5rem, 16vw, 8rem); 
+            font-weight: 800; letter-spacing: -4px;
+            position: relative; z-index: 5;
         }
 
         .running .timer-box::after {
@@ -109,14 +132,6 @@
             100% { background-position: 200% 0; }
         }
 
-        .timer-val {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(3.5rem, 16vw, 8rem); 
-            font-weight: 800; letter-spacing: -4px;
-            position: relative; z-index: 5;
-        }
-
-        /* --- BUTONLAR --- */
         .btn-group { display: flex; justify-content: center; gap: 20px; margin-top: 30px; flex-wrap: wrap; }
         .btn {
             padding: 20px 45px; border-radius: 20px; border: none;
@@ -128,27 +143,40 @@
         .btn-finish { background: rgba(255, 255, 255, 0.05); color: var(--text); border: 1px solid var(--border); }
         .btn-finish:not(:disabled):hover { background: var(--danger); color: white; }
 
-        /* --- VERİ PANELİ --- */
+        /* Veri Paneli */
         .data-explorer {
             width: 100%; max-width: 850px;
             background: var(--card); border-radius: 35px;
             padding: 40px; border: 1px solid var(--border);
             backdrop-filter: var(--glass);
+            transition: opacity 0.8s ease;
         }
+
+        .weekly-chart {
+            display: flex; align-items: flex-end; justify-content: space-around;
+            height: 60px; margin-bottom: 30px; padding: 0 10px;
+        }
+        .chart-bar {
+            width: 12%; background: var(--accent); border-radius: 6px;
+            opacity: 0.25; position: relative; transition: 0.4s;
+        }
+        .chart-bar:hover { opacity: 0.8; }
+        .chart-bar::after {
+            content: attr(data-day); position: absolute; bottom: -20px;
+            left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--dim);
+        }
+
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: rgba(255, 255, 255, 0.03); padding: 25px; border-radius: 24px; border: 1px solid var(--border); }
         .stat-card b { display: block; font-size: 1.6rem; color: var(--accent); font-family: 'JetBrains Mono'; }
 
-        /* --- İMZA EFEKTİ (SADE VE ŞIK) --- */
         .signature {
             margin-top: 50px; padding: 20px 40px;
             font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
             letter-spacing: 8px; color: var(--dim); text-align: center;
+            transition: opacity 0.8s ease;
         }
-        .sig-letter { 
-            display: inline-block; 
-            transition: color 0.6s ease, text-shadow 0.6s ease; 
-        }
+        .sig-letter { display: inline-block; transition: 0.6s ease; }
 
         .theme-switch {
             position: fixed; top: 25px; right: 25px; width: 50px; height: 50px;
@@ -159,17 +187,18 @@
         @media (max-width: 650px) { .stats-grid { grid-template-columns: 1fr; } .btn { width: 100%; } }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <button class="theme-switch" onclick="toggleTheme()">
         <i id="themeIcon" class="fas fa-moon"></i>
     </button>
 
-    <div class="cosmic-glow"></div>
+    <div class="cosmic-glow-top"></div>
+    <div class="cosmic-glow-bottom"></div>
     <div id="particles" class="particles-container"></div>
 
     <div class="glass-container" id="timerContainer">
-        <div style="letter-spacing: 5px; font-weight: 700; font-size: 0.7rem; color: var(--accent); margin-bottom: 10px; opacity: 0.8;">MehmetKorkmaz</div>
+        <div style="letter-spacing: 5px; font-weight: 700; font-size: 0.7rem; color: var(--accent); margin-bottom: 10px; opacity: 0.8;">MEHMET KORKMAZ</div>
         <div class="timer-box">
             <div class="timer-val" id="timer">00:00:00</div>
         </div>
@@ -183,7 +212,8 @@
         </div>
     </div>
 
-    <div class="data-explorer">
+    <div class="data-explorer" id="dataExplorer">
+        <div class="weekly-chart" id="weeklyBars"></div>
         <div class="stats-grid">
             <div class="stat-card"><span>OTURUM</span><b id="totalSessions">0</b></div>
             <div class="stat-card"><span>TOPLAM</span><b id="totalTime">0s 0d</b></div>
@@ -247,9 +277,12 @@
     function toggleTimer() {
         const btn = document.getElementById('mainBtn');
         const container = document.getElementById('timerContainer');
+        const body = document.getElementById('mainBody');
+
         if (!isRunning) {
             isRunning = true;
             container.classList.add('running');
+            body.classList.add('running-timer');
             startTime = Date.now() - elapsedTime;
             timerInterval = setInterval(() => {
                 elapsedTime = Date.now() - startTime;
@@ -260,6 +293,7 @@
         } else {
             isRunning = false;
             container.classList.remove('running');
+            body.classList.remove('running-timer');
             clearInterval(timerInterval);
             btn.innerHTML = '<i class="fas fa-play"></i> Devam Et';
         }
@@ -284,7 +318,11 @@
         localStorage.setItem('study_db_pro', JSON.stringify(db));
         elapsedTime = 0;
         document.getElementById('timer').textContent = "00:00:00";
-        document.getElementById('timerContainer').classList.remove('running');
+        
+        // Bitirince kaydırmayı aç ve verileri göster
+        document.documentElement.style.overflowY = "auto";
+        document.body.style.height = "auto";
+        
         resetUI();
         renderData();
     }
@@ -294,16 +332,32 @@
         isRunning = false;
         document.getElementById('mainBtn').innerHTML = '<i class="fas fa-play"></i> Başlat';
         document.getElementById('finishBtn').disabled = true;
+        document.getElementById('mainBody').classList.remove('running-timer');
     }
 
     function renderData() {
         const db = JSON.parse(localStorage.getItem('study_db_pro') || '[]');
         const tableBody = document.getElementById('dataTable');
+        
         document.getElementById('totalSessions').textContent = db.length;
         const totalMs = db.reduce((acc, curr) => acc + curr.durationMs, 0);
         document.getElementById('totalTime').textContent = Math.floor(totalMs/3600000) + "s " + Math.floor((totalMs%3600000)/60000) + "d";
         const maxMs = db.length > 0 ? Math.max(...db.map(o => o.durationMs)) : 0;
         document.getElementById('maxSession').textContent = formatTime(maxMs).substring(0,5);
+
+        // Haftalık Grafik (Son 7 gün)
+        const weeklyBars = document.getElementById('weeklyBars');
+        const last7Days = [...Array(7)].map((_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            return d.toLocaleDateString('tr-TR');
+        }).reverse();
+
+        weeklyBars.innerHTML = last7Days.map(date => {
+            const dayTotal = db.filter(item => item.date === date).reduce((a, b) => a + b.durationMs, 0);
+            const height = Math.min((dayTotal / (4 * 3600000)) * 100, 100); // 4 saat %100 kabul edilir
+            return `<div class="chart-bar" style="height:${height || 5}%" data-day="${date.split('.')[0]}"></div>`;
+        }).join('');
 
         tableBody.innerHTML = db.slice().reverse().map(item => `
             <tr>
@@ -342,5 +396,4 @@
 </script>
 
 </body>
-
 </html>
